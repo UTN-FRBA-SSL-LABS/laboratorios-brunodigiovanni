@@ -277,7 +277,7 @@ Los tests de `IsEmpty` ya están activos en `StringTest.c`. Corré `make test` y
 
 **P1** — `IsEmpty` podría haberse escrito también como `return s[0] == '\0'`. ¿Son equivalentes? ¿Por qué?
 
-> R:
+> R: Sí, son equivalentes. En C, s[0] es equivalente a *(s + 0), es decir, *s. Ambos acceden al primer carácter del string.
 
 ---
 
@@ -328,14 +328,14 @@ make test
 
 **P2** — ¿Qué hace `s + 1`? ¿Por qué avanza al siguiente carácter y no al siguiente byte?
 
-> R:
+> R: s + 1 realiza aritmética de punteros y avanza a la dirección de memoria del siguiente char. Dado que sizeof(char) es 1 byte, avanza exactamente 1 byte hacia el siguiente carácter.
 
 **P3** — Si llamaras a `GetLength(NULL)`, ¿qué pasaría? ¿Por qué las precondiciones del contrato dicen `s != NULL`?
 
-> R:
+> R: Ocurriría una falla de segmentación (segmentation fault) por desreferenciar un puntero nulo (NULL). La precondición exige s != NULL para garantizar que la memoria sea accesible.
 
 ```
-GETLENGTH_PASA=
+GETLENGTH_PASA=SI
 ```
 _(escribí SI cuando todos los tests de GetLength pasen)_
 
@@ -367,7 +367,8 @@ El `while` termina cuando alguna de las dos cadenas llega a `'\0'`. Después dev
 
 **P4** — ¿Qué dos casos están mal cubiertos por `return 1`? Describí un ejemplo para cada uno.
 
-> R:
+> R: Si s1 es más corta que s2 (ej. s1 = "hola", s2 = "hola mundo"): el bucle se detiene cuando s1 llega a '\0', pero s2 sigue. Devolver 1 diría erróneamente que son iguales.
+> Si s2 es más corta que s1 (ej. s1 = "hola mundo", s2 = "hola"): el bucle se detiene cuando s2 llega a '\0', diciendo erróneamente que son iguales.
 
 #### Corrección
 
@@ -384,7 +385,7 @@ make test
 ```
 
 ```
-AREEQUAL_PASA=
+AREEQUAL_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreEqual pasen)_
 
@@ -414,7 +415,7 @@ int AreDecimalDigits(const char *s) {
 
 **P5** — ¿Por qué la cadena vacía no debería considerarse un conjunto de dígitos decimales? Pensalo desde la especificación matemática.
 
-> R:
+> R: Según la especificación matemática AreDecimalDigits(ε) = 0, la cadena vacía carece de caracteres, por lo que no contiene ningún dígito decimal.
 
 #### Corrección
 
@@ -425,7 +426,7 @@ make test
 ```
 
 ```
-AREDECIMALDIGITS_PASA=
+AREDECIMALDIGITS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de AreDecimalDigits pasen)_
 
@@ -452,7 +453,7 @@ make test
 ```
 
 ```
-CONTAINS_PASA=
+CONTAINS_PASA=SI
 ```
 _(escribí SI cuando todos los tests de Contains pasen)_
 
@@ -467,7 +468,7 @@ Antes de implementar, discutí con tu equipo:
 
 **P6** — Conclusión de la discusión:
 
-> R:
+> R: Es correcto mantenerla en un módulo separado Conversion aplicando el principio de responsabilidad única (SRP): String maneja y consulta cadenas, mientras que Conversion realiza transformaciones de tipo entre String e int.
 
 ---
 
@@ -494,7 +495,7 @@ int ToInteger(const char *s) {
 
 **P7** — El loop acumula correctamente el valor en `resultado`. ¿Qué está mal en el `return`?
 
-> R:
+> R: Devolvía únicamente signo en lugar de retornar la multiplicación signo * resultado.
 
 #### Corrección
 
@@ -506,10 +507,10 @@ make test
 
 **P8** — La expresión `*s - '0'` convierte un carácter dígito al entero correspondiente. ¿Por qué funciona? ¿Qué devuelve `'3' - '0'`?
 
-> R:
+> R: Funciona porque los dígitos numéricos en la tabla ASCII ('0' a '9') están ordenados de forma consecutiva (del 48 al 57). Restar '3' - '0' equivale a 51 - 48, lo que devuelve el número entero 3.
 
 ```
-TOINTEGER_PASA=
+TOINTEGER_PASA=SI
 ```
 _(escribí SI cuando todos los tests de ToInteger pasen)_
 
@@ -562,7 +563,7 @@ foo
 
 **P9** — ¿Por qué `(void)argc` suprime un warning? ¿Cuándo sería necesario usar `argc`?
 
-> R:
+> R: Le indica al compilador que la variable no se utiliza en la función, suprimiendo el aviso de parámetro sin usar (-Wunused-parameter). Se requeriría argc si fuera necesario validar la cantidad de argumentos recibidos.
 
 ---
 
@@ -589,7 +590,7 @@ Salida esperada:
 ```
 
 ```
-LONGITUDES_PASA=
+LONGITUDES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -616,7 +617,7 @@ make mayorlongitud
 ```
 
 ```
-MAYORLONGITUD_PASA=
+MAYORLONGITUD_PASA=SI
 ```
 _(SI o NO)_
 
@@ -635,7 +636,7 @@ make todosiguales
 ```
 
 ```
-TODOSIGUALES_PASA=
+TODOSIGUALES_PASA=SI
 ```
 _(SI o NO)_
 
@@ -652,7 +653,7 @@ make suma
 ```
 
 ```
-SUMA_PASA=
+SUMA_PASA=SI
 ```
 _(SI o NO)_
 
@@ -662,15 +663,15 @@ _(SI o NO)_
 
 **P10** — `GetLength` es recursiva pero en C una llamada recursiva consume un stack frame. Si llamaras `GetLength` con un string de 1.000.000 de caracteres, ¿qué pasaría? ¿Cómo lo resolverías?
 
-> R:
+> R: Produciría un desbordamiento de pila (stack overflow) por acumulación de marcos de pila (stack frames). Se soluciona implementando un bucle iterativo (for o while) o mediante la optimización de llamada final (tail call optimization).
 
 **P11** — En la Parte III, todos los programas usan `char **arg` para iterar en vez de un índice entero. ¿Qué ventaja tiene este estilo? ¿Cuándo sería preferible usar el índice?
 
-> R:
+> R: Aprovecha la presencia del centinela NULL al final de argv y la aritmética de punteros sin necesidad de gestionar una variable índice. Un índice es preferible cuando se requiere conocer la posición exacta del argumento o realizar accesos no secuenciales.
 
 **P12** — En C, `"hola"` es un literal de tipo `const char *`. Si intentaras modificar un carácter con `s[0] = 'H'`, el comportamiento es indefinido. ¿Por qué? ¿En qué parte de la memoria viven los literales?
 
-> R:
+> R: Viven en el segmento de memoria estática de solo lectura (.rodata). Intentar modificarlos genera un comportamiento indefinido (segmentation fault) porque el sistema operativo protege dicha región de memoria contra escritura.
 
 ---
 
@@ -678,11 +679,11 @@ _(SI o NO)_
 
 ### Checklist
 
-- [ ] `String.c` con todas las funciones implementadas y tests pasando
-- [ ] `Conversion.c` con `ToInteger` corregida y tests pasando
-- [ ] Los 5 programas funcionando (`make all`)
-- [ ] `make test` pasa localmente
-- [ ] Todo pusheado a `main`
+- [x] `String.c` con todas las funciones implementadas y tests pasando
+- [x] `Conversion.c` con `ToInteger` corregida y tests pasando
+- [x] Los 5 programas funcionando (`make all`)
+- [x] `make test` pasa localmente
+- [x] Todo pusheado a `main`
 
 ### Verificación local
 
